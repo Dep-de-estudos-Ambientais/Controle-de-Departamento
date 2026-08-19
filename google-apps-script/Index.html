@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0B2B24">
+  <title>Painel de Acompanhamento das Atividades do DEA</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#F4F7F5;--surface:#FFFFFF;--ink:#102A23;--muted:#6B7D76;--line:#DFE8E3;
+      --forest:#0B2B24;--forest2:#164A36;--green:#2B8A62;--lime:#A8D85A;--lime-soft:#EBF7D7;
+      --purple:#7C3AED;--purple-soft:#F0E8FF;--orange:#F59E0B;--orange-soft:#FFF1D6;
+      --blue:#3B82F6;--red:#D95D5D;--slate:#789087;--shadow:0 18px 60px rgba(20,48,38,.09);
+      --radius:24px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button,input,select{font:inherit}.shell{min-height:100vh}
+    .hero{position:relative;overflow:hidden;background:radial-gradient(circle at 88% -15%,rgba(168,216,90,.32),transparent 34%),radial-gradient(circle at 14% 120%,rgba(43,138,98,.38),transparent 40%),linear-gradient(125deg,#081F1B,#0D3429 55%,#164A36);color:#fff;padding:24px clamp(18px,4vw,58px) 96px}
+    .hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent)}
+    .hero-inner{max-width:1500px;margin:auto;position:relative;z-index:1}.topline{display:flex;justify-content:space-between;gap:22px;align-items:center}
+    .logo-box{background:#fff;border-radius:18px;padding:8px 12px;width:min(390px,58vw);box-shadow:0 12px 36px rgba(0,0,0,.13)}.dea-logo{display:block;width:100%;height:auto}
+    .actions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.update-badge{padding:10px 13px;border-radius:14px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);font-size:12px;color:rgba(255,255,255,.82);backdrop-filter:blur(10px)}
+    .btn{border:1px solid rgba(255,255,255,.18);background:#fff;color:var(--forest);font-weight:800;padding:10px 15px;border-radius:13px;cursor:pointer;transition:.2s}.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.15)}.btn:disabled{opacity:.55;cursor:wait;transform:none}
+    .hero-copy{margin-top:48px;max-width:1100px}.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:850;color:#D6F0A8}.eyebrow:before{content:"";width:24px;height:2px;background:var(--lime);border-radius:99px}
+    h1{font-size:clamp(31px,4.3vw,58px);line-height:1.02;letter-spacing:-.045em;margin:13px 0 0;max-width:1120px;font-weight:850}.subtitle{margin-top:16px;max-width:920px;font-size:15px;line-height:1.6;color:rgba(255,255,255,.72)}
+    main{max-width:1500px;margin:-62px auto 0;padding:0 clamp(16px,3vw,36px) 58px;position:relative;z-index:2}.card{background:var(--surface);border:1px solid rgba(223,232,227,.88);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}.kpi{padding:18px;min-height:188px;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-58px;top:-58px;background:linear-gradient(135deg,rgba(168,216,90,.15),transparent)}
+    .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.065em;color:var(--muted);font-weight:850}.kpi-value{font-size:34px;font-weight:900;letter-spacing:-.045em;color:var(--forest);margin-top:8px}.kpi-note{font-size:11px;color:var(--muted);margin-top:2px;min-height:18px}.compare{margin-top:14px;display:grid;gap:6px}.compare-row{display:grid;grid-template-columns:68px 1fr 27px;align-items:center;gap:7px;font-size:9.5px;color:var(--muted);font-weight:700}.mini-track{height:5px;background:#EDF2EF;border-radius:99px;overflow:hidden}.mini-fill{height:100%;border-radius:99px}.mini-fill.green{background:var(--green)}.mini-fill.purple{background:var(--purple)}.mini-fill.orange{background:var(--orange)}.compare-row strong{text-align:right;color:var(--ink);font-size:10px}
+    .progress-track{height:7px;background:#EDF2EF;border-radius:99px;overflow:hidden;margin-top:14px}.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--lime))}.kpi-meta{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);margin-top:7px}.kpi-meta b{color:var(--forest)}
+    .section-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin:38px 2px 14px}.section-kicker{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.13em;color:var(--green)}.section-head h2{font-size:23px;letter-spacing:-.028em;margin:5px 0 0}.section-head p{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:720px;line-height:1.5}
+    .executive{display:grid;grid-template-columns:1fr 1fr;gap:16px}.annual-card{grid-column:1/-1;min-height:430px}.chart-card{padding:22px}.chart-title{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.chart-card h3{font-size:16px;margin:0;letter-spacing:-.015em}.desc{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:5px}.chart-wrap{height:320px;margin-top:12px;position:relative}.donut-card .chart-wrap{height:290px}
+    .legend-note{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:10px;color:var(--muted)}.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}.dot-green{background:var(--green)}.dot-purple{background:var(--purple)}.dot-orange{background:var(--orange)}
+    .planning-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.planning-card{padding:22px;position:relative;overflow:hidden}.planning-card.primary{background:linear-gradient(135deg,#0D3429,#174D39);color:white;border-color:transparent}.planning-card.primary .plan-label,.planning-card.primary .plan-desc{color:rgba(255,255,255,.68)}.planning-card.primary .plan-big,.planning-card.primary .plan-stat b{color:white}.plan-label{text-transform:uppercase;letter-spacing:.08em;font-size:10px;font-weight:850;color:var(--green)}.plan-big{font-size:40px;font-weight:900;letter-spacing:-.05em;margin-top:8px;color:var(--forest)}.plan-desc{font-size:12px;color:var(--muted);margin-top:3px}.plan-progress{height:10px;background:rgba(123,144,135,.18);border-radius:99px;overflow:hidden;margin:18px 0 10px}.planning-card.primary .plan-progress{background:rgba(255,255,255,.12)}.plan-progress>div{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--lime),#D8F29E)}.plan-stat{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--muted);margin-top:9px}.plan-stat b{color:var(--forest)}.plan-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.tag{font-size:10px;font-weight:800;border-radius:999px;padding:6px 8px;background:#EFF4F1;color:#52665E}.primary .tag{background:rgba(255,255,255,.11);color:rgba(255,255,255,.82)}
+    .registry{overflow:hidden}.toolbar{padding:18px 20px;border-bottom:1px solid var(--line);display:grid;gap:14px}.filter-top{display:grid;grid-template-columns:1.4fr .65fr .65fr;gap:10px}.control{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 12px;outline:none;color:var(--ink)}.control:focus{border-color:#81B59F;box-shadow:0 0 0 3px rgba(43,138,98,.1)}
+    .category-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.filter-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:850;color:var(--muted);margin-right:4px}.cat-btn{border:1px solid var(--line);background:#F9FBFA;color:#657871;padding:7px 10px;border-radius:999px;font-size:10.5px;font-weight:800;cursor:pointer;transition:.15s}.cat-btn:hover{border-color:#AFC5BA}.cat-btn.active{background:var(--forest);border-color:var(--forest);color:white;box-shadow:0 4px 14px rgba(11,43,36,.16)}
+    .table-wrap{overflow:auto;max-height:720px}table{border-collapse:collapse;width:100%;min-width:1080px}th{position:sticky;top:0;z-index:1;background:#F7FAF8;color:#6B7D76;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:13px 16px;border-bottom:1px solid var(--line)}td{padding:13px 16px;border-bottom:1px solid #EDF2EF;font-size:12px;line-height:1.45;vertical-align:top}tbody tr:hover{background:#FBFDFC}.type-cell{font-weight:850;color:var(--green);white-space:nowrap}.plan-cell{font-size:10.8px;color:#53665F;max-width:220px}.activity-cell{font-weight:700;max-width:440px}.detail-cell{color:var(--muted);max-width:340px}.pill{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:9.8px;font-weight:850;white-space:nowrap}.pill.ok{background:#E3F5EC;color:#16704D}.pill.run{background:#FFF1D6;color:#986312}.pill.review{background:#E8F0FF;color:#3768A6}.pill.analysis{background:#F0E8FF;color:#6F35C8}.pill.neutral{background:#EEF2F0;color:#61726B}.table-footer{display:flex;justify-content:space-between;gap:14px;padding:13px 18px;border-top:1px solid var(--line);font-size:10.8px;color:var(--muted)}.empty{padding:36px;text-align:center;color:var(--muted)}
+    .team-card{margin-top:38px;padding:25px}.team-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:15px}.team-member{background:#fff;padding:15px 17px}.team-member strong{display:block;font-size:12.5px;color:var(--forest)}.team-member span{display:block;margin-top:3px;font-size:10.8px;color:var(--muted);line-height:1.4}.team-member.head{background:#F1F8EA}.team-member.head strong{color:#1F5A38}
+    .loading{position:fixed;inset:0;background:rgba(244,247,245,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:99}.loading.show{display:flex}.spinner{width:45px;height:45px;border:4px solid #DCE8E1;border-top-color:var(--green);border-radius:50%;animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.error{display:none;background:#FCE7E7;color:#8D3F3F;border:1px solid #F2CBCB;border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:12px}.error.show{display:block}
+    @media(max-width:1280px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.planning-grid{grid-template-columns:1fr 1fr}.planning-card:last-child{grid-column:1/-1}}
+    @media(max-width:850px){.hero{padding-bottom:104px}.topline{align-items:flex-start}.actions{max-width:280px}.executive,.planning-grid{grid-template-columns:1fr}.annual-card,.planning-card:last-child{grid-column:auto}.filter-top{grid-template-columns:1fr}.team-grid{grid-template-columns:1fr}.chart-wrap{height:290px}}
+    @media(max-width:640px){.topline{display:block}.logo-box{width:min(390px,100%)}.actions{margin-top:14px;justify-content:flex-start;max-width:none}.hero-copy{margin-top:35px}.kpi-grid{grid-template-columns:1fr 1fr}.kpi{min-height:176px;padding:15px}.kpi-value{font-size:29px}.compare-row{grid-template-columns:58px 1fr 24px}.section-head{align-items:flex-start;flex-direction:column}.team-card{padding:17px}}
+    @media(max-width:420px){.kpi-grid{grid-template-columns:1fr}.kpi{min-height:auto}.update-badge{width:100%}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="topline">
+        <div class="logo-box"><svg class="dea-logo" viewBox="0 0 420 112" role="img" aria-label="DEA — Departamento de Estudos Ambientais" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(4 7)">
+    <path d="M16 50C18 23 39 6 67 6c19 0 34 7 46 20" fill="none" stroke="#90C43F" stroke-width="9" stroke-linecap="round"/>
+    <path d="M103 13l13 16-20 2" fill="#90C43F"/>
+    <path d="M21 52L45 31l16 17 15-15 22 20c-11 10-24 15-39 15-16 0-28-5-38-16Z" fill="#6B7A73"/>
+    <path d="M18 57c13 13 30 20 49 20 16 0 31-5 43-15-7 20-27 34-51 34-27 0-47-15-55-38Z" fill="#184B31"/>
+  </g>
+  <text x="133" y="57" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="800" letter-spacing="-3" fill="#184B31">DEA</text>
+  <text x="136" y="81" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#184B31">Departamento de Estudos Ambientais</text>
+  <path d="M136 91h255" stroke="#184B31" stroke-width="1.3" opacity=".45"/>
+</svg></div>
+        <div class="actions">
+          <div class="update-badge" id="updatedAt">Última atualização da planilha: —</div>
+          <button class="btn" id="refreshBtn" onclick="loadData(true)">Atualizar dados</button>
+        </div>
+      </div>
+      <div class="hero-copy">
+        <div class="eyebrow">Planejamento & desempenho</div>
+        <h1>Painel de Acompanhamento das Atividades do Departamento de Estudos Ambientais</h1>
+        <div class="subtitle">Planejamento alimentado pela planilha de acompanhamento do Departamento de Estudos Ambientais (DEA)</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="error" id="errorBox"></div>
+    <section class="kpi-grid" id="kpiGrid"></section>
+
+    <div class="section-head">
+      <div><div class="section-kicker">Leitura gerencial</div><h2>Visão executiva</h2><p>Comparação da produção anual e situação atual das entregas registradas na planilha.</p></div>
+    </div>
+    <section class="executive">
+      <article class="card chart-card annual-card">
+        <div class="chart-title"><div><h3>Indicadores anuais do DEA</h3><div class="desc">DEA 2026 comparado ao DEA 2025 e ao DTGEO 2025.</div></div></div>
+        <div class="legend-note"><span><i class="legend-dot dot-green"></i>DEA 2026</span><span><i class="legend-dot dot-purple"></i>DEA 2025</span><span><i class="legend-dot dot-orange"></i>DTGEO 2025</span></div>
+        <div class="chart-wrap"><canvas id="annualChart"></canvas></div>
+      </article>
+      <article class="card chart-card donut-card"><div><h3>Status das demandas</h3><div class="desc">Situação das 36 demandas registradas em 2026.</div></div><div class="chart-wrap"><canvas id="demandChart"></canvas></div></article>
+      <article class="card chart-card donut-card"><div><h3>Estudos e projetos</h3><div class="desc">Status atual dos estudos, projetos e produtos cadastrados.</div></div><div class="chart-wrap"><canvas id="projectChart"></canvas></div></article>
+    </section>
+
+    <div class="section-head">
+      <div><div class="section-kicker">Planejamento anual</div><h2>Plano de Trabalho e inovação</h2><p>O campo “Planejamento anual” é usado para distinguir entregas previstas, produtos novos e iniciativas que avançam para 2027.</p></div>
+    </div>
+    <section class="planning-grid" id="planningGrid"></section>
+
+    <div class="section-head">
+      <div><div class="section-kicker">Base de acompanhamento</div><h2>Registro de atividades</h2><p>Por padrão, são exibidos apenas Estudos e Projetos. Use os filtros para adicionar ou retirar outras categorias.</p></div>
+    </div>
+    <section class="card registry">
+      <div class="toolbar">
+        <div class="filter-top">
+          <input id="searchInput" class="control" type="search" placeholder="Buscar atividade, planejamento, solicitante ou comentário…" oninput="renderTable()">
+          <select id="statusFilter" class="control" onchange="renderTable()"><option value="">Todos os status</option></select>
+          <select id="planFilter" class="control" onchange="renderTable()"><option value="">Todo planejamento</option></select>
+        </div>
+        <div class="category-row" id="categoryFilters"><span class="filter-label">Categorias:</span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tipo</th><th>Planejamento anual / classificação</th><th>Atividade / produto</th><th>Status</th><th>Detalhes</th></tr></thead>
+          <tbody id="activityBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer"><span id="tableCount">—</span><span>Filtros aplicados em tempo real</span></div>
+    </section>
+
+    <section class="card team-card">
+      <div class="section-kicker">Equipe técnica</div>
+      <h2 style="margin:5px 0 0;font-size:22px;letter-spacing:-.025em">Departamento de Estudos Ambientais</h2>
+      <div class="team-grid">
+        <div class="team-member head"><strong>Bruno Silva</strong><span>Chefe do Departamento de Estudos Ambientais</span></div>
+        <div class="team-member"><strong>André Leal</strong><span>Pesquisador do Departamento de Estudos Ambientais</span></div>
+        <div class="team-member"><strong>Cristiane Mouzinho</strong><span>Pesquisadora do Departamento de Estudos Ambientais</span></div>
+        <div class="team-member"><strong>Danyella França</strong><span>Pesquisadora do Departamento de Estudos Ambientais</span></div>
+        <div class="team-member"><strong>Dayana Maciel</strong><span>Pesquisadora do Departamento de Estudos Ambientais</span></div>
+        <div class="team-member"><strong>Nivea Karina</strong><span>Pesquisadora do Departamento de Estudos Ambientais</span></div>
+        <div class="team-member"><strong>Ricardo Santana</strong><span>Pesquisador do Departamento de Estudos Ambientais</span></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="loading" id="loading"><div class="spinner"></div></div>
+<script>
+const SNAPSHOT={"resumo":[["Departamentos","Anos","Publicações","Demandas","Agendas"],["DEA",2025,12,57,70],["DEA",2026,9,36,60],["DTGEO",2025,14,37,79]],"projetos":[["Planejamento anual","Estudos/Projetos e produtos","STATUS","Comentarios","resultado desta pagina"],["PLANO DE TRABALHO 2026","Plataforma de monitoramento para eventos com fogo do estado do Maranhão","Entregue ","Assinado ACT com o corpo de bombeiro, o DEA ficou responsavel pelas quetoes adminitrativas do termo de cooperação e o DETGEO, com a elaboração da plataforma",9],["PLANO DE TRABALHO 2026","Dinâmica Ambiental das Bacias Hidrográficas - Rio Mearim","Em revisão","Revisado por Bruno",null],["PLANO DE TRABALHO 2026","Relatório de Focos de Calor anual 2025","Entregue","Entregue",null],["PLANO DE TRABALHO 2026","Infográficos de Focos de Calor: 1 trimestre","Entregue","Entregue",null],["PLANO DE TRABALHO 2026","Infográficos de Focos de Calor: 2 trimestre","Entregue","Entregue",null],["PLANO DE TRABALHO 2026","Nota Técnica - Gerenciamento de Desastres Naturais no estado do Maranhão","Em elaboração","Em construção",null],["PLANO DE TRABALHO 2026","Variação Espaço-temporal da Superfície Hídrica da Bacia Hidrográfica do Rio Maracaçumé","Em elaboração","Em construção",null],["PLANO DE TRABALHO 2026","PROPOSTA METODOLÓGICA DO PLANO DE REGIONALIZAÇÃO DE GERENCIAMENTO DE RESÍDUOS SÓLIDOS NO ESTADO DO MARANHÃO","Em revisão","Revisado por Bruno",null],["PLANO DE TRABALHO 2026","Pontos de Alagamentos na Ilha do Maranhão","Entregue","Entregue",null],["PLANO DE TRABALHO 2026","Diretrizes Estratégicas para a Gestão do Risco de Inundações na Bacia Hidrográfica do Rio Pindaré ","Entregue","Entregue",null],["PLANO DE TRABALHO 2026","Painel da Atividade Pesqueira no Município de Raposa ",null,null,null],["Produtos novos","Sistema de relatórios automáticos relatorio mensal de focos de calor ","Entregue","Aprimorado para modelo mensal, com inserção de novos dados, entregue a comunicação retorno até dia 21 de agosto de 2026",null],["Produtos novos","Atualização dos relatórios automáticos relatorio Trimestrais de focos de calor ","Em elaboração",null,null],["Produtos Iniciado em 2026, previsão 2027 ","Dinâmica Ambiental das Bacias Hidrográficas - Rio Maracaçumé","Em elaboração","Etapas das atividades de campo realizadas e na construção do texto da publicação",null],["Produtos novos","Cenário de Emissões de Carbono e Oportunidades no Mercado de Carbono no Estado do Maranhão","Em elaboração","Etapa inicial de elaboração",null],["Produtos Iniciado em 2026, previsão 2027 ","Estudos da Infraestrutura Pesqueira","Em analise diretoria e presidência  ","Etapa inicial de elaboração",null],["PLANO DE TRABALHO 2026 - Outra diretoria","Resultados - Metodologia para identificação e priorização de comunidades rurais para o Projeto Amazônico de Gestão Sustentável (PAGES)","Entregue","Entregue",null],["Produtos novos","FLOOD MAP: PLATAFORMA COLABORATIVA PARA MAPEAMENTO DE ALAGAMENTOS NA ILHA DO MARANHÃO (inova GP)","Entregue","Entregue",null],["Produtos novos","Aprendizado de máquina aplicado ao monitoramento orbital dos focos de calor no estado do Maranhão, Brasil: integração de geotecnologias para a prevenção e o combate ao fogo (Inova Gp)","Entregue","Entregue",null],["Produtos novos","DINÂMICA AMBIENTAL DAS BACIAS HIDROGRÁFICAS MARANHENSES: CATÁLOGO DE MAPAS DA BACIA HIDROGRÁFICA DO MEARIM","Entregue","Entregue",null]],"eventos":[["Eventos","Proponetes ","Instituições  ","resultados"],["Assinatura da Act com o corpo de Bombeiros",null,null,9],["Apresentação de dados do Estudo da Bacia do Rio Preguiças -  Na reúnião do Comitê da Bacia Hidrográfica dos Rios Preguiças e Periá (CBH-Preguiças e Periá)",null,null,null],["V Catc - Congresso Ambiental dos Tribunais de Contas",null,null,null],["Entrega do centro estadual de monitoramento Agrometereologico ",null,null,null],["5ª Reunião Ordinária do Comitê Permanente de Gestão da Pesca e do UsoSustentável dos Recursos Pesqueiros Demersais das Regiões Norte e Nordeste (CPG DemersaisN/NE).",null,null,null],["4ª Reunião Extraordinária do Comitê Permanente de Gestão daPesca e do Uso Sustentável dos Recursos Pesqueiros Demersais das Regiões Norte e Nordeste - CPGDemersais Norte/Nordeste.",null,null,null],[" Capacitação MRV na SEMA",null,null,null],["Fórum Maranhense de Meio Ambiente",null,null,null],["Reunião com  o Ministério da Pesca e Aquicultura, para apresentação de dados preliminares de estudo sobre a estrutura pesqueira do estado do Maranhão",null,null,null]],"demandas":[["DEMANDA","SOLICITANTE","STATUS","resultados"],["Mapa das Zonas do Zee","DEP","Entregue",36],["Elaboração de planilha de indicadores para o Dataimesc","DEP","Entregue",null],["Levantamento de Dados da para a base de informações ambientais do estado do Maranhão","Departamento","Entregue",null],["Revisão dos indicadores enviados pelo IPAM ao Estado do Maranhão","IPAM, Seplan e SEMA","Entregue",null],["Apresentação de dados preliminares de estudo sobre a estrutura pesqueira do estado do Maranhão para o Ministério da Pesca e Aquicultura","Ministério da Pesca e Aquicultura","Entregue",null],["Produção de Artigo para o Premio Inova GP 2026 - Plataforma de alagamentos","Planejamento anual","Entregue",null],["Produção de Artigo para o Prêmio Inova GP 2026 - Focos de Calor","Planejamento anual","Entregue",null],["Plano de atividades para o mapeamento da Bacia do Rio Alegre - Santo Amaro","Prefeitura municipal de Santo Amaro","Entregue",null],["Atualização de Indicadores para as plataformas do IMESC","Presidência","Entregue",null],["Construção do Plano de atividades de 2026","Presidência","Entregue",null],["Elaboração de requisitos de quadro profissional para bolsistas de pôs graduação - IMESC","Presidência","Entregue",null],["Projeto para emenda parlamentar 2027","Presidência","Entregue",null],["Envio de informações e mapas para a Secretaria de Representação Institucional do Estado do Maranhão no Distrito Federal","Presidência","Entregue",null],["Construção do processo de aditivo de prazo do Act IMESC e SEMA","Presidência","Entregue",null],["Capacitação MRV na SEMA","Presidência","Entregue",null],["Processo de aquisição de computadores para a Act IMESC e SEMA","Presidência","Entregue",null],["Processo de aquisição de Drone e Baterias para o TED IMESC e SEMA","Presidência","Entregue",null],["Resposta ao Mapeamento de Sensibilidades a Eólicas Offshore","Presidência","Entregue",null],["Elaboração de proposta de eixo de estudos par zona costeira","Presidência","Entregue",null],["Levatamento de inormaçoes municipais para eugenio barros","Presidência","Entregue",null],["Elaboração de edital para a seleção de bolsistas de pôs graduação, para o convenio Sema e IMESC - Resíduos Sólidos","Presidência - SEMA","Entregue",null],["Construção de base de informacional para o ICMS Ecologico ","SEFAz","Entregue",null],["Produção de Mapas para o gabinete do Governador","SEG e Gabinete do Governador","Entregue",null],["Levatamento de Indicadores para a plataforma de monitoreamento do plano PPCDQ","SEMA e IPAM","Entregue",null],["Acompanhamento da construção da plataforma de monitoreamento do plano PPCDQ, junto as outras secretarias do estado","SEMA e IPAM (Suporte a varias secretarias do estado do Maranhão)","Entregue",null],["Indicadores para o Maranhão 2050","SEPLAN - Presidência","Entregue",null],["Resposta a solicitação de mapas e dados da dinâmica do rio preguiças para escola no município de Urbano Santos","Sociedade civil","Entregue",null],["Construção da apresentação para o Fórum Maranhense de Meio Ambiente","Sociedade civil","Entregue",null],["Parecerista nos editais de pesquisas do Finclima","Sociedade civil","Entregue",null],["Entrevista sobre o estudo de Risco da Bacia do Pindaré","TV Mirante","Entregue",null],["Resposta de Questionário sobre o estudo de Risco da Bacia do Pindaré","TV Mirante","Entregue",null],["Produção de Act imesc e corpo de Bombeiro","Corpo de Bombeiros Militar do Maranhão (CBMMA)","Entregue",null],["Produção de Act imesc e Ministério da Justiça e Segurança Pública (MJSP)","Presidência e MJSP","Em andamento",null],["Produção de edital para contrapração de pesquisador bolsista (SEMA)","SEMA e IMESC","Em andamento",null],["Produção de edital para contrapração de pesquisador bolsista (IMESC)","Presidência","Em andamento",null],["Relatorio de Atividades PAGES/Saf","SAF e IMESC","Entregue",null]],"reunioes":[["Reunião","Data","REsultados"],["Reunião de alinhamento para o periodo de eleição",2026,51],["Reunião  de diretoria",2026,null],["Reunião  de diretoria",2026,null],["Reunião  Para atualização do data imesc",2026,null],["Reunião  Para atualização do data imesc",2026,null],["Reunião  para o Cenário de Emissões de Carbono e Oportunidades no Mercado de Carbono no Estado do Maranhão ",2026,null],["Reunião  para o Cenário de Emissões de Carbono e Oportunidades no Mercado de Carbono no Estado do Maranhão ",2026,null],["Reunião  para o Cenário de Emissões de Carbono e Oportunidades no Mercado de Carbono no Estado do Maranhão ",2026,null],["Reunião para revisão do ICMS ecologico",2026,null],["Reunião para revisão do ICMS ecologico",2026,null],["Reunião para revisão do ICMS ecologico",2026,null],["Reunião para revisão do ICMS ecologico",2026,null],["Reunião com o Vitor e dionatan sobre o oficio da sema oficio 241",2026,null],["Reunião  para o levantamento das informaçoes de Eugenio barros ",2026,null],["Reunião com a Sema e o IPAM",2026,null],["Reunião do CIT INOVA",2026,null],["Reunião do CIT INOVA -  ONline",2026,null],["Reunião do CIT INOVA - TERESINA",2026,null],["Reunião de planejamento do Evento de desertificação ",2026,null],["Apresentação do Plano de desertificação do estado do Maranhão -Timon",2026,null],["Reunião com o Ministerio da Pesca para debater sobre o estudo de estrurura pesqueira do estado do Maranhão",2026,null],["Reunião com a Presidencia para debater sobre o estudo de estrurura pesqueira do estado do Maranhão",2026,null],["Reunião com o municipio de Santo Amaro - Bacias Hidrograficas",2026,null],["Reunião de alinhamento do imesc 20anos ",2026,null],["Reunião de alinhamento do imesc 20anos ",2026,null],["Reunião de alinhamento do imesc 20anos ",2026,null],["Reunião de alinhamento do imesc 20anos ",2026,null],["Reunião de alinhamento do imesc 20anos ",2026,null],["Reunião de alinhamento do imesc 20anos ",2026,null],["Reuniao com o TCE",2026,null],["Reunião com o corpo de Bombeiro Batalhão ambiental ",2026,null],["Reunião com o corpo de Bombeiro - Assinatura de Act",2026,null],["Reunião com o corpo de Bombeiro - Apresentação de documento ",2026,null],["Reuniao para alinhar indiadores com a dep para o MA2050",2026,null],["Reuniao para alinhar indiadores com a dep para o MA2050",2026,null],["Reuniao com IPAM e SEPLAM sobre os indicadores do Maranhão 2050","2026-06-26 00:00:00",null],["Reuniao com os pesquisadores do PAGES ",2026,null],["Reuniao com os pesquisadores do PAGES ",2026,null],["Reuniao de concelheiros da REBIO do Gurupi",2026,null],["Reunião com SEMA, IPAM e outros orgãos do estado para apresentar a calculadora de carbono do IPAM",2026,null],["Reunião de Indicadores do ZEE",2026,null],["Reunião de Indicadores do ZEE",2026,null],["Reunião de Indicadores do ZEE",2026,null],["Reunião de Indicadores do ZEE",2026,null],["Reunião para cosntrução da Minuta de Decreto do Zoneamento",2026,null],["Reunião para cosntrução da Minuta de Decreto do Zoneamento",2026,null],["Reunião para cosntrução da Minuta de Decreto do Zoneamento",2026,null],["Reunião para cosntrução da Minuta de Decreto do Zoneamento",2026,null],["Reunião para cosntrução da Minuta de Decreto do Zoneamento","2026-07-08 00:00:00",null],["Reunião de apresentação dos pareceristas Finclima ",2026,null],["Reunião com a SEMA para apresentação do andamento dos projetos",2026,null]],"infograficos":[["Infográficos Temáticos","Status","Contagem de entregas"],["Dia Mundial da Vida Selvagem","Entregue (Publicado) ",9],["Dia Nacional de Conscientização sobre as Mudanças Climáticas","Entregue (Publicado) ",2],["Dia Mundial da Água","Entregue (Publicado) ",11],["Dia Mundial da Terra","Entregue (Publicado) ",null],["Dia do Geógrafo (a) / Dia Mundial da Energia","Entregue (Publicado) ",null],["Dia Mundial do Meio Ambiente","Entregue (Publicado) ",null],["Dia Mundial dos Oceanos/ Dia do Oceanógrafo","Entregue (Publicado) ",null],["Semana Mundial do Meio Ambiente","Entregue (Publicado) ",null],["Dia Mundial de Combate à Desertificação e à Seca","Entregue (Publicado) ",null],["Dia do Pescador","Entregue",null],["Dia Internacional de Proteção dos Manguezais","Entregue",null],["Dia Nacional do Patrimônio Histórico e Cultural","A publicação de novos conteúdos está temporariamente suspensa em atendimento às restrições do período eleitoral.",null],["Dia da Amazônia","A publicação de novos conteúdos está temporariamente suspensa em atendimento às restrições do período eleitoral.",null],["Dia Nacional do Cerrado","A publicação de novos conteúdos está temporariamente suspensa em atendimento às restrições do período eleitoral.",null],["Semana Nacional da Mobilidade","A publicação de novos conteúdos está temporariamente suspensa em atendimento às restrições do período eleitoral.",null],["Dia Mundial do Turismo","A publicação de novos conteúdos está temporariamente suspensa em atendimento às restrições do período eleitoral.",null],["Dia Internacional da Geodiversidade","A publicação de novos conteúdos está temporariamente suspensa em atendimento às restrições do período eleitoral.",null],["Dia do Mar","A publicação de novos conteúdos está temporariamente suspensa em atendimento às restrições do período eleitoral.",null],["Dia Internacional para a Redução de Risco de Desastres","Ainda não produzido",null],["Dia do Rio","Ainda não produzido",null],["Dia do Solo","Ainda não produzido",null]],"atualizadoEm":"19/08/2026 às 16:55"};
+const C={green:'#2B8A62',lime:'#A8D85A',purple:'#7C3AED',orange:'#F59E0B',blue:'#3B82F6',red:'#D95D5D',slate:'#789087',forest:'#0B2B24'};
+const nf=new Intl.NumberFormat('pt-BR');
+let charts={}, currentData=null, allActivities=[];
+const activeCategories=new Set(['Estudos e Projetos']);
+const categories=['Estudos e Projetos','Demandas','Eventos','Reuniões','Infográficos Temáticos'];
+
+function esc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
+function clean(v){return String(v??'').trim()}
+function num(v){let n=Number(String(v??'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:0}
+function pct(a,b){return b?100*a/b:0}
+function rows(arr){return (arr||[]).slice(1).filter(r=>r&&r.some(v=>clean(v)!==''))}
+function delivered(s){return clean(s).toLowerCase().includes('entregue')}
+function statusGroup(s){let x=clean(s).toLowerCase();if(x.includes('entregue'))return 'Entregue';if(x.includes('revis'))return 'Em revisão';if(x.includes('analis')||x.includes('análise'))return 'Em análise';if(x.includes('elabora')||x.includes('andamento')||x.includes('constru'))return 'Em elaboração / andamento';if(!x)return 'Sem status';return clean(s)}
+function pillClass(s){let x=clean(s).toLowerCase();if(x.includes('entregue'))return'ok';if(x.includes('revis'))return'review';if(x.includes('analis')||x.includes('análise'))return'analysis';if(x.includes('elabora')||x.includes('andamento')||x.includes('constru'))return'run';return'neutral'}
+function countBy(a,fn){return a.reduce((o,x)=>{let k=fn(x)||'Sem status';o[k]=(o[k]||0)+1;return o},{})}
+
+function normalize(data){
+  const resumo=rows(data.resumo).map(r=>({dep:clean(r[0]),ano:num(r[1]),publicacoes:num(r[2]),demandas:num(r[3]),agendas:num(r[4])}));
+  const projetos=rows(data.projetos).filter(r=>clean(r[1])).map(r=>({planejamento:clean(r[0])||'Sem classificação',atividade:clean(r[1]),status:clean(r[2])||'Sem status',comentarios:clean(r[3])||'—'}));
+  const demandas=rows(data.demandas).filter(r=>clean(r[0])).map(r=>({atividade:clean(r[0]),detalhe:clean(r[1])||'—',status:clean(r[2])||'Sem status'}));
+  const eventos=rows(data.eventos).filter(r=>clean(r[0])).map(r=>({atividade:clean(r[0]),detalhe:[clean(r[1]),clean(r[2])].filter(Boolean).join(' • ')||'—',status:'Evento'}));
+  const reunioes=rows(data.reunioes).filter(r=>clean(r[0])).map(r=>({atividade:clean(r[0]),detalhe:clean(r[1])||'2026',status:'Reunião'}));
+  const infograficos=rows(data.infograficos||data.cards).filter(r=>clean(r[0])).map(r=>({atividade:clean(r[0]),detalhe:'Infográfico temático',status:clean(r[1])||'Sem status'}));
+  return {resumo,projetos,demandas,eventos,reunioes,infograficos,atualizadoEm:data.atualizadoEm||'—'};
+}
+
+function compCard(label,main,dea25,dt25,note){let mx=Math.max(main,dea25,dt25,1);let row=(n,v,cls)=>`<div class="compare-row"><span>${n}</span><div class="mini-track"><div class="mini-fill ${cls}" style="width:${Math.max(4,pct(v,mx))}%"></div></div><strong>${nf.format(v)}</strong></div>`;return `<article class="card kpi"><div class="kpi-label">${esc(label)}</div><div class="kpi-value">${nf.format(main)}</div><div class="kpi-note">${esc(note)}</div><div class="compare">${row('DEA 2026',main,'green')}${row('DEA 2025',dea25,'purple')}${row('DTGEO 25',dt25,'orange')}</div></article>`}
+function progressCard(label,value,total,note){let rate=pct(value,total);return `<article class="card kpi"><div class="kpi-label">${esc(label)}</div><div class="kpi-value">${nf.format(value)}<span style="font-size:16px;color:#82948D;font-weight:750"> / ${nf.format(total)}</span></div><div class="kpi-note">${esc(note)}</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(rate,100)}%"></div></div><div class="kpi-meta"><span>Progresso</span><b>${rate.toFixed(1).replace('.',',')}%</b></div></article>`}
+
+function render(data){
+  currentData=normalize(data);let d=currentData;
+  let dea26=d.resumo.find(x=>x.dep.toUpperCase()==='DEA'&&x.ano===2026)||{};
+  let dea25=d.resumo.find(x=>x.dep.toUpperCase()==='DEA'&&x.ano===2025)||{};
+  let dt25=d.resumo.find(x=>x.dep.toUpperCase()==='DTGEO'&&x.ano===2025)||{};
+  let plan=d.projetos.filter(x=>x.planejamento==='PLANO DE TRABALHO 2026');let planDone=plan.filter(x=>delivered(x.status)).length;
+  let innovation=d.projetos.filter(x=>x.planejamento==='Produtos novos');let innovationDone=innovation.filter(x=>delivered(x.status)).length;
+  let projectDone=d.projetos.filter(x=>delivered(x.status)).length;
+  let demandDone=d.demandas.filter(x=>delivered(x.status)).length;
+  document.getElementById('updatedAt').textContent='Última atualização da planilha: '+d.atualizadoEm;
+  document.getElementById('kpiGrid').innerHTML=[
+    compCard('Publicações',dea26.publicacoes||0,dea25.publicacoes||0,dt25.publicacoes||0,'Produção registrada em 2026'),
+    compCard('Demandas',dea26.demandas||d.demandas.length,dea25.demandas||0,dt25.demandas||0,`${demandDone} entregues • ${d.demandas.length-demandDone} em andamento`),
+    compCard('Agenda',dea26.agendas||d.eventos.length+d.reunioes.length,dea25.agendas||0,dt25.agendas||0,'Reuniões e eventos consolidados'),
+    progressCard('Plano de Trabalho 2026',planDone,plan.length,'Entregas previstas concluídas'),
+    progressCard('Produtos novos · inovação',innovationDone,innovation.length,'Produtos novos já entregues'),
+    progressCard('Estudos e projetos',projectDone,d.projetos.length,'Total de itens entregues')
+  ].join('');
+  renderCharts(d,dea26,dea25,dt25);
+  renderPlanning(d);
+  buildActivities(d);
+  buildFilters();
+  renderTable();
+}
+
+const valueLabels={id:'valueLabels',afterDatasetsDraw(chart){const ctx=chart.ctx;ctx.save();chart.data.datasets.forEach((ds,di)=>{let meta=chart.getDatasetMeta(di);if(meta.hidden)return;meta.data.forEach((el,i)=>{let v=Number(ds.data[i]||0);if(!v)return;let p=el.tooltipPosition();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 10px Inter,system-ui,sans-serif';if(chart.config.type==='doughnut'){ctx.fillStyle='#fff';ctx.fillText(String(v),p.x,p.y)}else{ctx.fillStyle='#4F625A';ctx.textBaseline='bottom';ctx.fillText(String(v),p.x,p.y-6)}})});ctx.restore()}};
+const centerText={id:'centerText',afterDraw(chart){if(chart.config.type!=='doughnut')return;let total=chart.data.datasets[0].data.reduce((a,b)=>a+Number(b||0),0);let {ctx,chartArea:{left,right,top,bottom}}=chart;ctx.save();ctx.textAlign='center';ctx.fillStyle=C.forest;ctx.font='900 28px Inter,system-ui,sans-serif';ctx.fillText(total,(left+right)/2,(top+bottom)/2-2);ctx.fillStyle='#73857E';ctx.font='700 9px Inter,system-ui,sans-serif';ctx.fillText('REGISTROS',(left+right)/2,(top+bottom)/2+16);ctx.restore()}};
+if(window.Chart)Chart.register(valueLabels,centerText);
+function replaceChart(id,cfg){if(!window.Chart)return;if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),cfg)}
+function commonLegend(){return{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',boxWidth:8,boxHeight:8,padding:15,color:'#63766E',font:{size:10,weight:'700'},generateLabels(chart){let labels=Chart.defaults.plugins.legend.labels.generateLabels(chart);if(chart.config.type==='doughnut')labels.forEach(l=>{l.text=`${l.text} · ${chart.data.datasets[0].data[l.index]}`});return labels}}}}
+function renderCharts(d,dea26,dea25,dt25){
+  replaceChart('annualChart',{type:'bar',data:{labels:['Publicações','Demandas','Agendas'],datasets:[
+    {label:'DEA 2026',data:[dea26.publicacoes||0,dea26.demandas||0,dea26.agendas||0],backgroundColor:C.green,borderRadius:9,maxBarThickness:58},
+    {label:'DEA 2025',data:[dea25.publicacoes||0,dea25.demandas||0,dea25.agendas||0],backgroundColor:C.purple,borderRadius:9,maxBarThickness:58},
+    {label:'DTGEO 2025',data:[dt25.publicacoes||0,dt25.demandas||0,dt25.agendas||0],backgroundColor:C.orange,borderRadius:9,maxBarThickness:58}
+  ]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},plugins:{legend:commonLegend(),tooltip:{enabled:true}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:'#52665E',font:{weight:'750',size:11}}},y:{beginAtZero:true,border:{display:false},grid:{color:'#E8EEEB'},ticks:{precision:0,color:'#7A8C84',font:{size:9}}}}}});
+  let dc=countBy(d.demandas,x=>statusGroup(x.status));let dlabels=Object.keys(dc),dvals=Object.values(dc);
+  replaceChart('demandChart',{type:'doughnut',data:{labels:dlabels,datasets:[{data:dvals,backgroundColor:[C.green,C.orange,C.blue,C.purple,C.slate],borderColor:'#fff',borderWidth:4,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:commonLegend()}}});
+  let pc=countBy(d.projetos,x=>statusGroup(x.status));let plabels=Object.keys(pc),pvals=Object.values(pc);
+  replaceChart('projectChart',{type:'doughnut',data:{labels:plabels,datasets:[{data:pvals,backgroundColor:[C.green,C.orange,C.blue,C.purple,C.slate,C.red],borderColor:'#fff',borderWidth:4,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:commonLegend()}}});
+}
+
+function renderPlanning(d){
+  const specs=[
+    {key:'PLANO DE TRABALHO 2026',title:'Plano de Trabalho 2026',desc:'Entregas previstas no planejamento anual do DEA',primary:true},
+    {key:'Produtos novos',title:'Produtos novos · inovação',desc:'Produtos não previstos originalmente e incorporados ao portfólio',primary:false},
+    {key:'Produtos Iniciado em 2026, previsão 2027',title:'Iniciados em 2026 → 2027',desc:'Iniciativas em desenvolvimento com continuidade prevista',primary:false}
+  ];
+  document.getElementById('planningGrid').innerHTML=specs.map(s=>{let a=d.projetos.filter(x=>x.planejamento===s.key);let done=a.filter(x=>delivered(x.status)).length;let rate=pct(done,a.length);let counts=countBy(a,x=>statusGroup(x.status));let tags=Object.entries(counts).map(([k,v])=>`<span class="tag">${esc(k)} · ${v}</span>`).join('');return `<article class="card planning-card ${s.primary?'primary':''}"><div class="plan-label">${esc(s.title)}</div><div class="plan-big">${done}<span style="font-size:17px;font-weight:750;opacity:.62"> / ${a.length}</span></div><div class="plan-desc">${esc(s.desc)}</div><div class="plan-progress"><div style="width:${Math.min(rate,100)}%"></div></div><div class="plan-stat"><span>Percentual entregue</span><b>${rate.toFixed(1).replace('.',',')}%</b></div><div class="plan-tags">${tags}</div></article>`}).join('');
+}
+
+function buildActivities(d){
+  allActivities=[];
+  d.projetos.forEach(x=>allActivities.push({tipo:'Estudos e Projetos',planejamento:x.planejamento,atividade:x.atividade,status:x.status,detalhe:x.comentarios}));
+  d.demandas.forEach(x=>allActivities.push({tipo:'Demandas',planejamento:'Demanda 2026',atividade:x.atividade,status:x.status,detalhe:'Solicitante: '+x.detalhe}));
+  d.eventos.forEach(x=>allActivities.push({tipo:'Eventos',planejamento:'Agenda 2026',atividade:x.atividade,status:x.status,detalhe:x.detalhe}));
+  d.reunioes.forEach(x=>allActivities.push({tipo:'Reuniões',planejamento:'Agenda 2026',atividade:x.atividade,status:x.status,detalhe:'Data: '+x.detalhe}));
+  d.infograficos.forEach(x=>allActivities.push({tipo:'Infográficos Temáticos',planejamento:'Comunicação temática',atividade:x.atividade,status:x.status,detalhe:x.detalhe}));
+}
+function buildFilters(){
+  const cats=document.getElementById('categoryFilters');cats.innerHTML='<span class="filter-label">Categorias:</span>'+categories.map(c=>`<button class="cat-btn ${activeCategories.has(c)?'active':''}" data-cat="${esc(c)}" onclick="toggleCategory(this)">${esc(c)}</button>`).join('');
+  let statuses=[...new Set(allActivities.map(x=>x.status))].sort((a,b)=>a.localeCompare(b,'pt-BR'));document.getElementById('statusFilter').innerHTML='<option value="">Todos os status</option>'+statuses.map(s=>`<option>${esc(s)}</option>`).join('');
+  let plans=[...new Set(allActivities.map(x=>x.planejamento))].sort((a,b)=>a.localeCompare(b,'pt-BR'));document.getElementById('planFilter').innerHTML='<option value="">Todo planejamento</option>'+plans.map(s=>`<option>${esc(s)}</option>`).join('');
+}
+function toggleCategory(btn){let c=btn.dataset.cat;if(activeCategories.has(c))activeCategories.delete(c);else activeCategories.add(c);btn.classList.toggle('active',activeCategories.has(c));renderTable()}
+function renderTable(){
+  let q=clean(document.getElementById('searchInput').value).toLowerCase();let st=document.getElementById('statusFilter').value;let pl=document.getElementById('planFilter').value;
+  let items=allActivities.filter(x=>activeCategories.has(x.tipo)&&(!st||x.status===st)&&(!pl||x.planejamento===pl)&&(!q||[x.tipo,x.planejamento,x.atividade,x.status,x.detalhe].join(' ').toLowerCase().includes(q)));
+  let body=document.getElementById('activityBody');body.innerHTML=items.length?items.map(x=>`<tr><td class="type-cell">${esc(x.tipo)}</td><td class="plan-cell">${esc(x.planejamento)}</td><td class="activity-cell">${esc(x.atividade)}</td><td><span class="pill ${pillClass(x.status)}">${esc(x.status)}</span></td><td class="detail-cell">${esc(x.detalhe)}</td></tr>`).join(''):`<tr><td colspan="5" class="empty">Nenhuma atividade corresponde aos filtros selecionados.</td></tr>`;
+  document.getElementById('tableCount').textContent=`${items.length} registro${items.length===1?'':'s'} exibido${items.length===1?'':'s'} de ${allActivities.length}`;
+}
+function setLoading(v){document.getElementById('loading').classList.toggle('show',v);document.getElementById('refreshBtn').disabled=v}
+function showError(msg){let e=document.getElementById('errorBox');e.textContent=msg;e.classList.toggle('show',!!msg)}
+function loadData(manual=false){showError('');if(window.google&&google.script&&google.script.run){setLoading(true);google.script.run.withSuccessHandler(d=>{setLoading(false);render(d)}).withFailureHandler(err=>{setLoading(false);showError('Não foi possível atualizar os dados: '+(err&&err.message?err.message:err));render(SNAPSHOT)}).getDashboardData()}else{render(SNAPSHOT)}}
+loadData(false);
+</script>
+</body>
+</html>
