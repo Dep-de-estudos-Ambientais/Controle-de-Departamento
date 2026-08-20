@@ -1,56 +1,273 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Responsividade -->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
 
+  <!-- Título da página -->
   <title>
-    Painel de Acompanhamento das Atividades do DEA
+    Painel de Acompanhamento das Atividades do Departamento de Estudos Ambientais
   </title>
 
-  <link rel="icon" href="./favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32"
-        href="./favicon-32x32.png">
+  <!-- Descrição -->
+  <meta
+    name="description"
+    content="Painel de acompanhamento das atividades do Departamento de Estudos Ambientais - DEA/IMESC."
+  >
 
-  <link rel="apple-touch-icon"
-        sizes="180x180"
-        href="./apple-touch-icon.png">
+  <!-- Cor utilizada por navegadores móveis -->
+  <meta name="theme-color" content="#075c3b">
 
-  <link rel="manifest" href="./site.webmanifest">
+  <!-- Ícone principal -->
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="./logo-dea-vetorial.svg?v=3"
+  >
+
+  <!-- Favicon alternativo -->
+  <link
+    rel="shortcut icon"
+    href="./logo-dea-vetorial.svg?v=3"
+  >
+
+  <!-- Safari -->
+  <link
+    rel="mask-icon"
+    href="./logo-dea-vetorial.svg?v=3"
+    color="#075c3b"
+  >
 
   <style>
+    :root {
+      --dea-verde: #075c3b;
+      --fundo: #f5f7f6;
+    }
+
     * {
       box-sizing: border-box;
     }
 
-    html,
-    body {
-      margin: 0;
+    html {
       width: 100%;
       height: 100%;
-      background: #f4f7f5;
+      margin: 0;
+      padding: 0;
+      background: var(--fundo);
+    }
+
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+
+      background: var(--fundo);
+
+      overflow: hidden;
+
+      /* iPhone */
+      padding-top: env(safe-area-inset-top);
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+    }
+
+    #dashboard-container {
+      position: fixed;
+      inset: 0;
+
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+
+      margin: 0;
+      padding: 0;
+
+      background: var(--fundo);
       overflow: hidden;
     }
 
     #dashboard {
-      position: fixed;
-      inset: 0;
+      display: block;
+
       width: 100%;
       height: 100%;
-      border: 0;
+
+      margin: 0;
+      padding: 0;
+
+      border: none;
+      outline: none;
+
+      background: var(--fundo);
+    }
+
+    /* Tela exibida enquanto o painel carrega */
+    #loading {
+      position: fixed;
+      inset: 0;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      gap: 16px;
+
+      background: var(--fundo);
+
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      color: #25352f;
+
+      z-index: 10;
+
+      transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+    }
+
+    #loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #loading img {
+      width: 82px;
+      height: 82px;
+
+      object-fit: contain;
+
+      border-radius: 50%;
+    }
+
+    #loading strong {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    #loading span {
+      max-width: 300px;
+
+      padding: 0 20px;
+
+      text-align: center;
+
+      font-size: 13px;
+      line-height: 1.5;
+
+      color: #66736e;
+    }
+
+    /* Pequeno indicador de carregamento */
+    .spinner {
+      width: 30px;
+      height: 30px;
+
+      border: 3px solid rgba(7, 92, 59, 0.15);
+      border-top-color: var(--dea-verde);
+      border-radius: 50%;
+
+      animation: girar 0.8s linear infinite;
+    }
+
+    @keyframes girar {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Ajustes específicos para celular */
+    @media (max-width: 768px) {
+
+      #loading img {
+        width: 70px;
+        height: 70px;
+      }
+
+      #loading strong {
+        font-size: 15px;
+      }
+
+      #loading span {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 
+
 <body>
 
-  <iframe
-    id="dashboard"
-    src="https://script.google.com/macros/s/AKfycbywEVbEiDfeWZgp11Qr8WNGIqByX-cVzuQUyGcyvBkhH_mznpFj_Ssvn2LKI7p39qqPnA/exec"
-    title="Painel de Acompanhamento das Atividades do DEA">
-  </iframe>
+  <!-- Tela de carregamento -->
+  <div id="loading">
+
+    <img
+      src="./logo-dea-vetorial.svg"
+      alt="Logo do Departamento de Estudos Ambientais"
+    >
+
+    <strong>
+      Departamento de Estudos Ambientais
+    </strong>
+
+    <div class="spinner"></div>
+
+    <span>
+      Carregando o Painel de Acompanhamento das Atividades...
+    </span>
+
+  </div>
+
+
+  <!-- Dashboard -->
+  <main id="dashboard-container">
+
+    <iframe
+      id="dashboard"
+
+      src="https://script.google.com/macros/s/AKfycbywEVbEiDfeWZgp11Qr8WNGIqByX-cVzuQUyGcyvBkhH_mznpFj_Ssvn2LKI7p39qqPnA/exec"
+
+      title="Painel de Acompanhamento das Atividades do Departamento de Estudos Ambientais"
+
+      loading="eager"
+
+      allowfullscreen
+    ></iframe>
+
+  </main>
+
+
+  <script>
+    
+
+    const iframe = document.getElementById("dashboard");
+    const loading = document.getElementById("loading");
+
+    iframe.addEventListener("load", function () {
+
+      setTimeout(function () {
+        loading.classList.add("hidden");
+      }, 350);
+
+    });
+  </script>
 
 </body>
+
 </html>
+ 
