@@ -2,24 +2,44 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Acompanhamento das Atividades do DEA</title>
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <title>
+    Painel de Acompanhamento das Atividades do DEA
+  </title>
+
+  <link rel="icon" href="./favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32"
+        href="./favicon-32x32.png">
+
+  <link rel="apple-touch-icon"
+        sizes="180x180"
+        href="./apple-touch-icon.png">
+
+  <link rel="manifest" href="./site.webmanifest">
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #f5f7f6;
+    * {
+      box-sizing: border-box;
     }
 
-    iframe {
+    html,
+    body {
+      margin: 0;
       width: 100%;
-      height: 100vh;
+      height: 100%;
+      background: #f4f7f5;
+      overflow: hidden;
+    }
+
+    #dashboard {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       border: 0;
-      display: block;
     }
   </style>
 </head>
@@ -27,9 +47,9 @@
 <body>
 
   <iframe
+    id="dashboard"
     src="https://script.google.com/macros/s/AKfycbywEVbEiDfeWZgp11Qr8WNGIqByX-cVzuQUyGcyvBkhH_mznpFj_Ssvn2LKI7p39qqPnA/exec"
-    title="Painel de Acompanhamento das Atividades do DEA"
-    allowfullscreen>
+    title="Painel de Acompanhamento das Atividades do DEA">
   </iframe>
 
 </body>
