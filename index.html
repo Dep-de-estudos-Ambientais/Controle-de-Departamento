@@ -29,7 +29,7 @@
     .hero-copy{margin-top:48px;max-width:1100px}.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:850;color:#D6F0A8}.eyebrow:before{content:"";width:24px;height:2px;background:var(--lime);border-radius:99px}
     h1{font-size:clamp(31px,4.3vw,58px);line-height:1.02;letter-spacing:-.045em;margin:13px 0 0;max-width:1120px;font-weight:850}.subtitle{margin-top:16px;max-width:920px;font-size:15px;line-height:1.6;color:rgba(255,255,255,.72)}
     main{max-width:1500px;margin:-62px auto 0;padding:0 clamp(16px,3vw,36px) 58px;position:relative;z-index:2}.card{background:var(--surface);border:1px solid rgba(223,232,227,.88);border-radius:var(--radius);box-shadow:var(--shadow)}
-    .kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}.kpi{padding:18px;min-height:188px;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-58px;top:-58px;background:linear-gradient(135deg,rgba(168,216,90,.15),transparent)}
+    .kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(260px,340px));justify-content:center;gap:14px}.kpi{padding:18px;min-height:188px;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-58px;top:-58px;background:linear-gradient(135deg,rgba(168,216,90,.15),transparent)}
     .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.065em;color:var(--muted);font-weight:850}.kpi-value{font-size:34px;font-weight:900;letter-spacing:-.045em;color:var(--forest);margin-top:8px}.kpi-note{font-size:11px;color:var(--muted);margin-top:2px;min-height:18px}.compare{margin-top:14px;display:grid;gap:6px}.compare-row{display:grid;grid-template-columns:68px 1fr 27px;align-items:center;gap:7px;font-size:9.5px;color:var(--muted);font-weight:700}.mini-track{height:5px;background:#EDF2EF;border-radius:99px;overflow:hidden}.mini-fill{height:100%;border-radius:99px}.mini-fill.green{background:var(--green)}.mini-fill.purple{background:var(--purple)}.mini-fill.orange{background:var(--orange)}.compare-row strong{text-align:right;color:var(--ink);font-size:10px}
     .progress-track{height:7px;background:#EDF2EF;border-radius:99px;overflow:hidden;margin-top:14px}.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--lime))}.kpi-meta{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);margin-top:7px}.kpi-meta b{color:var(--forest)}
     .section-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin:38px 2px 14px}.section-kicker{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.13em;color:var(--green)}.section-head h2{font-size:23px;letter-spacing:-.028em;margin:5px 0 0}.section-head p{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:720px;line-height:1.5}
@@ -195,9 +195,6 @@ function render(data){
   let demandDone=d.demandas.filter(x=>delivered(x.status)).length;
   
   document.getElementById('kpiGrid').innerHTML=[
-    simpleCard('Publicações',dea26.publicacoes||0,'Produção registrada em 2026'),
-    simpleCard('Demandas',dea26.demandas||d.demandas.length,`${demandDone} entregues • ${d.demandas.length-demandDone} em andamento`),
-    simpleCard('Agenda',dea26.agendas||d.eventos.length+d.reunioes.length,'Reuniões e eventos consolidados'),
     progressCard('Plano de Trabalho 2026',planDone,plan.length,'Entregas previstas concluídas'),
     progressCard('Produtos novos · inovação',innovationDone,innovation.length,'Produtos novos já entregues'),
     progressCard('Estudos e projetos',projectDone,d.projetos.length,'Total de itens entregues')
